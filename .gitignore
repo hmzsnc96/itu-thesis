@@ -1,0 +1,11 @@
+# Derleme çıktıları
+*.pdf
+*.aux
+*.log
+
+# Render önizlemeleri
+page-*.png
+preview-*.png
+
+# Sistem
+.DS_Store
