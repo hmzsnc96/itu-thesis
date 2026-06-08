@@ -34,7 +34,7 @@ tezinize göre düzenleyin.
 - Çizelge Listesi ve Şekil Listesi (otomatik)
 - Özet / Summary
 - Ön materyalde roma (i, ii, …), gövdede arabik (1, 2, …) sayfa numarası
-- Numaralı bölümler (“BÖLÜM 1. …”) + numarasız ön/arka materyal başlıkları
+- Numaralı bölümler (“1. …”, alt başlıklar “1.1”, “1.1.1”) + numarasız ön/arka materyal başlıkları
 - Ekler (EKLER kapağı ile) ve Özgeçmiş
 - NUM (sayılı/IEEE) ve APA atıf stilleri — bkz. `main.typ` ve `main-apa.typ`
 - Türkçe ve İngilizce dil desteği (`dil: "tr"` / `dil: "en"`)
