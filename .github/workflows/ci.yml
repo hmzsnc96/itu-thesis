@@ -1,0 +1,43 @@
+name: CI
+
+# Her push ve PR'da paketi yerel olarak kurar ve örnek tezleri (NUM + APA)
+# derleyerek şablonun bozulmadığını doğrular.
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Typst
+        uses: typst-community/setup-typst@v3
+        with:
+          typst-version: latest
+
+      - name: Paketi yerel olarak kur (@local/community-itu-thesis:0.1.0)
+        run: |
+          DEST="$HOME/.local/share/typst/packages/local/community-itu-thesis/0.1.0"
+          mkdir -p "$DEST"
+          cp -r typst.toml lib.typ template README.md LICENSE "$DEST/"
+
+      - name: Örnekleri derle (NUM + APA)
+        run: |
+          cp -r template /tmp/test
+          sed -i 's#@preview/community-itu-thesis:0.1.0#@local/community-itu-thesis:0.1.0#g' \
+            /tmp/test/main.typ /tmp/test/main-apa.typ
+          typst compile /tmp/test/main.typ      /tmp/test/tez-num.pdf
+          typst compile /tmp/test/main-apa.typ  /tmp/test/tez-apa.pdf
+
+      - name: PDF'leri arşivle
+        uses: actions/upload-artifact@v4
+        with:
+          name: ornek-tezler
+          path: |
+            /tmp/test/tez-num.pdf
+            /tmp/test/tez-apa.pdf
