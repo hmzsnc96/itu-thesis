@@ -154,7 +154,7 @@
       yeni-sag-sayfa
       v(18.5mm)
       if numarali {
-        text(weight: "bold", size: 12pt)[#counter(heading).display(). #it.body]
+        text(weight: "bold", size: 12pt)[#counter(heading).display() #it.body]
       } else {
         text(weight: "bold", size: 12pt)[#it.body]
       }
@@ -371,6 +371,9 @@
   set heading(numbering: none)
   // LaTeX'te ön materyal tek satır aralığı (\singlespacing); gövde 1.5 (\oneandonehalf)
   set par(leading: 0.65em)
+  // cls \leaders ile aralıklı nokta dolgusu (içindekiler + çizelge/şekil listeleri);
+  // Typst varsayılan dolgusu çok sık olduğundan noktalar arasına boşluk koy.
+  set outline.entry(fill: repeat(gap: 2.5pt)[.])
 
   // "Sayfa" / "Page" sütun başlığı (cls: \cftaftertoctitle ... \bf\underline{Sayfa})
   let sayfa-etiket = if ingilizce { "Page" } else { "Sayfa" }
@@ -389,10 +392,8 @@
   }
 
   // ---- İÇİNDEKİLER ----
-  [
-    #set heading(outlined: false)
-    #heading(level: 1, if ingilizce { "TABLE OF CONTENTS" } else { "İÇİNDEKİLER" })
-  ]
+  // cls İÇİNDEKİLER'i kendi listesine de ekler (\addcontentsline{toc}{chapter}{...\contentsnameToC})
+  heading(level: 1, if ingilizce { "TABLE OF CONTENTS" } else { "İÇİNDEKİLER" })
   align(right)[#strong(underline(sayfa-etiket))]
   [
     // Bölüm ve ön/arka materyal (1. seviye) girdileri kalın — cls'teki gibi
@@ -456,7 +457,12 @@
   counter(page).update(1)
   counter(heading).update(0)
   [
-    #set heading(numbering: "1.1.1.1")
+    // cls: bölüm (1. derece) "1." biçiminde, alt başlıklar "1.1", "1.1.1" ...
+    // Sondaki nokta numaralandırmaya gömülü; böylece gövde ve İÇİNDEKİLER aynı görünür.
+    #set heading(numbering: (..n) => {
+      let p = n.pos()
+      if p.len() == 1 { numbering("1.", p.at(0)) } else { numbering("1.1.1.1", ..p) }
+    })
     #set par(leading: 1.45em)   // gövde: 1.5 satır aralığı (\oneandonehalf)
     #body
   ]
