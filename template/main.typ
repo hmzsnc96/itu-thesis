@@ -1,81 +1,80 @@
-// İTÜ Lisansüstü Tez Şablonu — NUM (sayılı atıf) sürümü
-// Kaynakça IEEE/sayılı stilde ([1], [2], …) gösterilir.
+// ITU Graduate Thesis Template — NUM (numeric citation) edition
+// References are shown in IEEE/numeric style ([1], [2], …).
 //
-// Derleme:  typst compile main.typ tez.pdf
+// Compile:  typst compile main.typ tez.pdf
 
-#import "@preview/community-itu-thesis:0.1.0": thesis
+#import "@preview/community-itu-thesis:0.2.0": thesis
 
 #show: thesis.with(
-  // ===== KİŞİSEL BİLGİLER =====
-  ad: "Öğrenci Adı",
-  soyad: "SOYADI",
-  ogrenci-no: "123456789",
-  unvan: "",
+  // ===== PERSONAL INFORMATION =====
+  name: "Öğrenci Adı",
+  surname: "SOYADI",
+  student-id: "123456789",
 
-  // ===== TEZ BAŞLIKLARI (en çok 3 satır) =====
-  tez-basligi: (
+  // ===== THESIS TITLES (up to 3 lines) =====
+  title-tr: (
     "TEZ BAŞLIĞININ BİRİNCİ SATIRI",
     "GEREKLİYSE İKİNCİ SATIR",
     "GEREKLİYSE ÜÇÜNCÜ SATIR",
   ),
-  thesis-title: (
+  title-en: (
     "FIRST LINE OF THESIS TITLE",
     "SECOND LINE IF NECESSARY",
     "THIRD LINE IF NECESSARY",
   ),
 
-  // ===== AKADEMİK BİLGİLER =====
-  anabilim-dali-tr: "Bilgisayar Mühendisliği Anabilim Dalı",
-  anabilim-dali-en: "Department of Computer Engineering",
+  // ===== ACADEMIC INFORMATION =====
+  department-tr: "Bilgisayar Mühendisliği Anabilim Dalı",
+  department-en: "Department of Computer Engineering",
   program-tr: "Bilgisayar Mühendisliği Programı",
   program-en: "Computer Engineering Programme",
-  // "lisansustu" | "bilisim" | "fenbilimleri" | "sosyalbilimler" | "enerji" | "avrasya"
-  enstitu: "lisansustu",
+  // "graduate" | "informatics" | "science" | "social-sciences" | "energy" | "eurasia"
+  institute: "graduate",
 
-  // ===== DANIŞMAN =====
-  danisman: "Prof. Dr. Adı SOYADI",
-  danisman-univ: "İstanbul Teknik Üniversitesi",
-  danisman-en: "Prof. Dr. Name SURNAME",
-  danisman-univ-en: "Istanbul Technical University",
-  es-danisman: "",
-  es-danisman-univ: "",
-  es-danisman-en: "",
-  es-danisman-univ-en: "",
+  // ===== ADVISOR =====
+  advisor-tr: "Prof. Dr. Adı SOYADI",
+  advisor-univ-tr: "İstanbul Teknik Üniversitesi",
+  advisor-en: "Prof. Dr. Name SURNAME",
+  advisor-univ-en: "Istanbul Technical University",
+  co-advisor-tr: "",
+  co-advisor-univ-tr: "",
+  co-advisor-en: "",
+  co-advisor-univ-en: "",
 
-  // ===== JÜRİ ÜYELERİ =====
-  juri: (
-    (ad: "Prof. Dr. Adı SOYADI", univ: "İstanbul Teknik Üniversitesi"),
-    (ad: "Prof. Dr. Adı SOYADI", univ: "Yıldız Teknik Üniversitesi"),
-    (ad: "Prof. Dr. Adı SOYADI", univ: "Boğaziçi Üniversitesi"),
+  // ===== JURY MEMBERS =====
+  jury: (
+    (name: "Prof. Dr. Adı SOYADI", univ: "İstanbul Teknik Üniversitesi"),
+    (name: "Prof. Dr. Adı SOYADI", univ: "Yıldız Teknik Üniversitesi"),
+    (name: "Prof. Dr. Adı SOYADI", univ: "Boğaziçi Üniversitesi"),
   ),
 
-  // ===== TARİHLER =====
-  savunma-tarihi-tr: "Aralık 2024",
-  savunma-tarihi-en: "December 2024",
-  teslim-tarihi-tr: "22 Eylül 2024",
-  teslim-tarihi-en: "22 September 2024",
-  savunma-tarihi-onay-tr: "21 Aralık 2024",
-  savunma-tarihi-onay-en: "21 December 2024",
+  // ===== DATES =====
+  cover-date-tr: "Aralık 2024",
+  cover-date-en: "December 2024",
+  submission-date-tr: "22 Eylül 2024",
+  submission-date-en: "22 September 2024",
+  defense-date-tr: "21 Aralık 2024",
+  defense-date-en: "21 December 2024",
 
-  // ===== AYARLAR =====
-  dil: "tr",                 // "tr" / "en"
-  derece: "yukseklisans",    // "yukseklisans" / "doktora"
-  cilt: "bez",               // "bez" / "karton"
+  // ===== SETTINGS =====
+  lang: "tr",               // "tr" / "en"
+  degree: "masters",        // "masters" / "phd"
+  binding: "hardcover",     // "hardcover" / "softcover"
 
-  // ===== ÖN/ARKA MATERYAL =====
-  ithaf: "Aileme,",
-  onsoz: include "onsoz.typ",
-  kisaltmalar: include "kisaltmalar.typ",
-  semboller: include "semboller.typ",
-  ozet: include "ozet.typ",
-  summary: include "summary.typ",
-  kaynakca: bibliography("refs.bib", style: "ieee", title: "KAYNAKLAR"),
-  ekler: include "ekler.typ",
-  ozgecmis: include "ozgecmis.typ",
+  // ===== FRONT/BACK MATTER =====
+  dedication: "Aileme,",
+  foreword: include "foreword.typ",
+  abbreviations: include "abbreviations.typ",
+  symbols: include "symbols.typ",
+  abstract-tr: include "abstract-tr.typ",
+  abstract-en: include "abstract-en.typ",
+  bibliography: bibliography("refs.bib", style: "ieee", title: "KAYNAKLAR"),
+  appendices: include "appendices.typ",
+  cv: include "cv.typ",
 )
 
 // =====================================================================
-//  BÖLÜMLER (gövde)
+//  CHAPTERS (body)
 // =====================================================================
 
 = GİRİŞ
@@ -104,9 +103,9 @@ Mevcut araştırmalar incelenerek özet halinde sunulmuştur.
 
 Bu bölümde araştırmanın yöntemi açıklanır. Şekil ve çizelge örnekleri aşağıdadır.
 
-// Gerçek görsel eklemek için bir "fig" klasörü oluşturup şöyle kullanın:
+// To add a real image, create a "fig" folder and use:
 //   #figure(image("fig/sekil.png", width: 80%), caption: [Açıklama])
-// Aşağıdaki yer tutucu, görselin nasıl yerleştirileceğini gösterir.
+// The placeholder below shows how a figure is laid out.
 #figure(
   rect(width: 80%, height: 5cm, fill: luma(240), stroke: 0.5pt + luma(160))[
     #align(center + horizon)[

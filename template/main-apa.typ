@@ -1,64 +1,64 @@
-// İTÜ Lisansüstü Tez Şablonu — APA (yazar-yıl atıf) sürümü
-// Kaynakça APA stilinde gösterilir. NUM sürümü için main.typ'a bakın.
+// ITU Graduate Thesis Template — APA (author-year citation) edition
+// References are shown in APA style. See main.typ for the NUM edition.
 //
-// Derleme:  typst compile main-apa.typ tez.pdf
+// Compile:  typst compile main-apa.typ tez.pdf
 
-#import "@preview/community-itu-thesis:0.1.0": thesis
+#import "@preview/community-itu-thesis:0.2.0": thesis
 
 #show: thesis.with(
-  ad: "Öğrenci Adı",
-  soyad: "SOYADI",
-  ogrenci-no: "123456789",
+  name: "Öğrenci Adı",
+  surname: "SOYADI",
+  student-id: "123456789",
 
-  tez-basligi: (
+  title-tr: (
     "TEZ BAŞLIĞININ BİRİNCİ SATIRI",
     "GEREKLİYSE İKİNCİ SATIR",
     "GEREKLİYSE ÜÇÜNCÜ SATIR",
   ),
-  thesis-title: (
+  title-en: (
     "FIRST LINE OF THESIS TITLE",
     "SECOND LINE IF NECESSARY",
     "THIRD LINE IF NECESSARY",
   ),
 
-  anabilim-dali-tr: "Bilgisayar Mühendisliği Anabilim Dalı",
-  anabilim-dali-en: "Department of Computer Engineering",
+  department-tr: "Bilgisayar Mühendisliği Anabilim Dalı",
+  department-en: "Department of Computer Engineering",
   program-tr: "Bilgisayar Mühendisliği Programı",
   program-en: "Computer Engineering Programme",
-  enstitu: "lisansustu",
+  institute: "graduate",
 
-  danisman: "Prof. Dr. Adı SOYADI",
-  danisman-univ: "İstanbul Teknik Üniversitesi",
-  danisman-en: "Prof. Dr. Name SURNAME",
-  danisman-univ-en: "Istanbul Technical University",
+  advisor-tr: "Prof. Dr. Adı SOYADI",
+  advisor-univ-tr: "İstanbul Teknik Üniversitesi",
+  advisor-en: "Prof. Dr. Name SURNAME",
+  advisor-univ-en: "Istanbul Technical University",
 
-  juri: (
-    (ad: "Prof. Dr. Adı SOYADI", univ: "İstanbul Teknik Üniversitesi"),
-    (ad: "Prof. Dr. Adı SOYADI", univ: "Yıldız Teknik Üniversitesi"),
-    (ad: "Prof. Dr. Adı SOYADI", univ: "Boğaziçi Üniversitesi"),
+  jury: (
+    (name: "Prof. Dr. Adı SOYADI", univ: "İstanbul Teknik Üniversitesi"),
+    (name: "Prof. Dr. Adı SOYADI", univ: "Yıldız Teknik Üniversitesi"),
+    (name: "Prof. Dr. Adı SOYADI", univ: "Boğaziçi Üniversitesi"),
   ),
 
-  savunma-tarihi-tr: "Aralık 2024",
-  savunma-tarihi-en: "December 2024",
-  teslim-tarihi-tr: "22 Eylül 2024",
-  teslim-tarihi-en: "22 September 2024",
-  savunma-tarihi-onay-tr: "21 Aralık 2024",
-  savunma-tarihi-onay-en: "21 December 2024",
+  cover-date-tr: "Aralık 2024",
+  cover-date-en: "December 2024",
+  submission-date-tr: "22 Eylül 2024",
+  submission-date-en: "22 September 2024",
+  defense-date-tr: "21 Aralık 2024",
+  defense-date-en: "21 December 2024",
 
-  dil: "tr",
-  derece: "yukseklisans",
-  cilt: "bez",
+  lang: "tr",
+  degree: "masters",
+  binding: "hardcover",
 
-  ithaf: "Aileme,",
-  onsoz: include "onsoz.typ",
-  kisaltmalar: include "kisaltmalar.typ",
-  semboller: include "semboller.typ",
-  ozet: include "ozet.typ",
-  summary: include "summary.typ",
-  // APA stili için "apa" kullanılır:
-  kaynakca: bibliography("refs.bib", style: "apa", title: "KAYNAKLAR"),
-  ekler: include "ekler.typ",
-  ozgecmis: include "ozgecmis.typ",
+  dedication: "Aileme,",
+  foreword: include "foreword.typ",
+  abbreviations: include "abbreviations.typ",
+  symbols: include "symbols.typ",
+  abstract-tr: include "abstract-tr.typ",
+  abstract-en: include "abstract-en.typ",
+  // Use "apa" for APA style:
+  bibliography: bibliography("refs.bib", style: "apa", title: "KAYNAKLAR"),
+  appendices: include "appendices.typ",
+  cv: include "cv.typ",
 )
 
 = GİRİŞ
@@ -72,7 +72,7 @@ Tez yazımında tutarlılığı sağlamak amaçlanmıştır.
 
 = YÖNTEM
 
-// Gerçek görsel eklemek için bir "fig" klasörü oluşturup şöyle kullanın:
+// To add a real image, create a "fig" folder and use:
 //   #figure(image("fig/sekil.png", width: 80%), caption: [Açıklama])
 #figure(
   rect(width: 80%, height: 5cm, fill: luma(240), stroke: 0.5pt + luma(160))[
