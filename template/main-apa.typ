@@ -3,7 +3,7 @@
 //
 // Compile:  typst compile main-apa.typ tez.pdf
 
-#import "@preview/community-itu-thesis:0.2.0": thesis
+#import "@preview/community-itu-thesis:0.3.0": thesis
 
 #show: thesis.with(
   name: "Öğrenci Adı",
@@ -20,6 +20,8 @@
     "SECOND LINE IF NECESSARY",
     "THIRD LINE IF NECESSARY",
   ),
+  // Title inside the approval-page sentence (title case); default: title lines joined
+  approval-title: "Tez Başlığının Birinci Satırı: Alt Başlık Varsa İki Noktadan Sonra",
 
   department-tr: "Bilgisayar Mühendisliği Anabilim Dalı",
   department-en: "Department of Computer Engineering",
@@ -40,8 +42,6 @@
 
   cover-date-tr: "Aralık 2024",
   cover-date-en: "December 2024",
-  submission-date-tr: "22 Eylül 2024",
-  submission-date-en: "22 September 2024",
   defense-date-tr: "21 Aralık 2024",
   defense-date-en: "21 December 2024",
 

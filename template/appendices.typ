@@ -1,5 +1,7 @@
-// APPENDICES content — the "EKLER" cover heading is added by the template.
-// Each appendix starts with a level-1 heading (=); these are printed unnumbered.
+// APPENDICES content — the "EKLER" heading is added by the template.
+// Each appendix starts with a level-1 heading (=). As in the LaTeX template the
+// first appendix follows "EKLER" on the same page, the others start on a new page;
+// their figures and tables are numbered A.1, B.1, ...
 
 = EK A: İlave Çalışmalar
 

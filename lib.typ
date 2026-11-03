@@ -2,15 +2,45 @@
 // Istanbul Technical University · Graduate School
 //
 // This template is a Typst rewrite of the official LaTeX class
-// (itutez.cls v1.7.1, January 2025). It produces the official elements:
-//   · Outer cover + Turkish inner cover + English inner cover
-//   · Jury approval/signature page ("KABUL VE ONAY")
-//   · Dedication, Foreword, Table of Contents, Abbreviations, Symbols
+// (itutez.cls, template v2.0.0, October 2026 — generated from the official
+// MS Word templates). It produces the official elements:
+//   · Outer cover + inner covers (thesis language first, then the other one)
+//   · Jury approval page + academic integrity declaration
+//   · Dedication, Preface, Table of Contents, Abbreviations, Symbols
 //   · List of Tables, List of Figures
-//   · Özet / Summary (Turkish and English abstracts)
+//   · Özet / Abstract (Turkish and English abstracts)
 //   · Roman page numbers (i, ii, …) in front matter, Arabic (1, 2, …) in body
 //   · Numbered chapters and unnumbered front/back-matter headings
-//   · Appendices (+ "EKLER" cover), Bibliography, Curriculum Vitae
+//   · Appendices (+ "EKLER" heading), Bibliography, Curriculum Vitae
+
+// ---- Line spacing (cls: \defbaselineskip = 13.8pt, Word single spacing for 12 pt Times) ----
+// Typst measures leading from the baseline to the cap height of the next line
+// (Times cap height = 7.945pt at 12 pt), so leading = baseline distance − 7.945pt.
+#let _single = 5.855pt     // single spacing:  13.8 pt baseline-to-baseline
+#let _onehalf = 12.755pt   // 1.5 spacing:     20.7 pt baseline-to-baseline
+#let _parskip = 12pt       // cls \parskip: 6 pt before + 6 pt after each paragraph
+
+// =====================================================================
+//  HELPERS FOR CONTENT FILES (exported)
+// =====================================================================
+
+/// Abbreviation / symbol list entry (cls \kisaltma, \sembol): bold "term:" in a
+/// 25 mm column; continuation lines of the description align with its first line.
+#let abbreviation(term, description) = context {
+  let label = strong[#term:]
+  par(hanging-indent: 25mm, {
+    if measure(label).width < 25mm { box(width: 25mm, label) } else { label + [ ] }
+    description
+  })
+}
+#let symbol-entry = abbreviation
+
+/// CV section heading (cls \cvbaslik), e.g. #cv-heading[ÖĞRENİM GEÇMİŞİ]
+#let cv-heading(title) = block(above: 12pt + _single + _parskip, below: _single, sticky: true, strong(title))
+/// CV education line (cls \cvogrenim): bold degree in a 30 mm column, bold colon, details.
+#let cv-education(degree, details) = par(hanging-indent: 30mm)[#box(width: 30mm, strong(degree))*:* #details]
+/// CV publication entry (cls \cvyayin): 1.25 cm hanging indent.
+#let cv-publication(entry) = par(hanging-indent: 12.5mm, entry)
 
 #let thesis(
   // ===== PERSONAL INFORMATION =====
@@ -18,9 +48,12 @@
   surname: "",
   student-id: "",
 
-  // ===== THESIS TITLES (up to 3 lines) =====
-  title-tr: ("", "", ""),   // Turkish (outer cover + Turkish inner cover)
-  title-en: ("", "", ""),   // English (English inner cover + approval page)
+  // ===== THESIS TITLES (up to 3 lines, printed exactly as written) =====
+  title-tr: ("", "", ""),   // Turkish (Turkish covers + ÖZET page)
+  title-en: ("", "", ""),   // English (English covers + ABSTRACT page)
+  // Title as it appears inside the approval-page sentence (title case, italic),
+  // e.g. "Tez Başlığı: Alt Başlık". Default: the thesis-language title lines joined.
+  approval-title: none,
 
   // ===== ACADEMIC INFORMATION =====
   department-tr: "",
@@ -45,28 +78,36 @@
   jury: (),
 
   // ===== DATES =====
-  cover-date-tr: "",        // Date on the covers (e.g. "Aralık 2024")
+  cover-date-tr: "",        // Month and year on the covers (e.g. "Mayıs 2025")
   cover-date-en: "",
-  submission-date-tr: "",   // Submission date on the approval page (e.g. "22 Eylül 2024")
-  submission-date-en: "",
-  defense-date-tr: "",      // Defense date on the approval page (e.g. "21 Aralık 2024")
+  defense-date-tr: "",      // Defense date on the approval page (e.g. "21 Mayıs 2025")
   defense-date-en: "",
+  // No longer printed: the v2 approval page has no submission date. Kept for compatibility.
+  submission-date-tr: "",
+  submission-date-en: "",
 
   // ===== SETTINGS =====
   lang: "tr",               // "tr" | "en"
   degree: "masters",        // "masters" | "phd"
-  binding: "hardcover",     // "hardcover" (cloth/bez) | "softcover" (cardboard/karton)
-  // printing: "two-sided" (blank pages + gutter margins, cls default)
-  //           "one-sided" (no blank pages, fixed left margin)
+  // Degree name on the English inner cover ("for the degree of ...").
+  // auto = "Master of Science" / "Doctor of Philosophy"; e.g. "Master of Arts".
+  degree-name-en: auto,
+  // "hardcover" (bez) | "softcover" (karton). Since v2 both versions have the same
+  // covers; only the meaning of the cover date differs (defense vs. submission).
+  binding: "hardcover",
+  // printing: "two-sided" (chapters start on a recto page + gutter margins, cls default)
+  //           "one-sided" (no recto alignment, fixed left margin)
+  // The backs of the covers, approval, integrity and dedication pages are blank in both.
   printing: "two-sided",
+  logo: auto,               // Cover logo: auto = official ITU logo, none = no logo, or an image(...)
 
   // ===== FRONT/BACK MATTER (content blocks) =====
   dedication: none,         // Dedication text (e.g. "Aileme,")
-  foreword: none,           // Foreword content
-  abbreviations: none,      // Abbreviations table/content
-  symbols: none,            // Symbols table/content
-  abstract-tr: none,        // Turkish abstract (ÖZET) content, incl. keywords
-  abstract-en: none,        // English abstract (SUMMARY) content, incl. keywords
+  foreword: none,           // Preface (ÖNSÖZ) content; the author's name is added below it
+  abbreviations: none,      // Abbreviations content (use #abbreviation(...))
+  symbols: none,            // Symbols content (use #symbol-entry(...))
+  abstract-tr: none,        // Turkish abstract (ÖZET) content
+  abstract-en: none,        // English abstract (ABSTRACT) content
   list-of-figures: true,    // Produce the List of Figures?
   list-of-tables: true,     // Produce the List of Tables?
   bibliography: none,       // Pass a bibliography(...) call here
@@ -78,16 +119,15 @@
   // ---- Language ----
   let is-english = lang == "en" or lang == "english"
   let lang-code = if is-english { "en" } else { "tr" }
+  let tr-en(tr, en) = if is-english { en } else { tr }
 
   // ---- Printing (two-/one-sided) ----
-  // cls onluarkali = twoside: chapters/covers start on a recto (right) page,
-  // blank pages are inserted and margins alternate for binding (\BolumSagdaKalsin).
+  // cls onluarkali = twoside: chapters start on a recto (right) page,
+  // blank pages are inserted and margins alternate for binding (\BolumSagdaKalsinNolu).
   let twoside = printing != "one-sided"
-  // Advance to the next recto (odd) page, inserting a blank verso if needed.
-  // In one-sided printing this is just a regular page break.
   let next-recto-page = if twoside { pagebreak(to: "odd", weak: true) } else { pagebreak(weak: true) }
 
-  // ---- Institute names ----
+  // ---- Institute names (cls \th@Enstitu / \th@Institute + \th@Instituteiki) ----
   let institute-tr = (
     "graduate": "Lisansüstü Eğitim Enstitüsü",
     "informatics": "Bilişim Enstitüsü",
@@ -100,36 +140,19 @@
     "graduate": "Graduate School",
     "informatics": "Informatics Institute",
     "science": "Graduate School of Science Engineering and Technology",
-    "social-sciences": "Graduate School of Social Sciences",
-    "energy": "Energy Institute",
+    "social-sciences": "Graduate School of Arts and Sciences",
+    "energy": "Institute of Energy",
     "eurasia": "Eurasia Institute of Earth Sciences",
   ).at(institute, default: "Graduate School")
 
-  // ---- Uppercase conversion ----
-  // upper() uses the Unicode default mapping and does not apply the Turkish
-  // "i → İ" rule (it would produce the wrong "İÇINDEKILER"). General fix:
-  // replace the only problematic letter "i" with "İ" before upper(); the other
-  // letters (ç, ş, ğ, ö, ü, ı) are converted correctly by upper() already.
-  // English text uses plain upper().
-  let tr-upper(s) = upper(str(s).replace("i", "İ"))
-  let en-upper(s) = upper(str(s))
-
-  let institute-header-tr = tr-upper("İstanbul Teknik Üniversitesi ★ " + institute-tr)
-  let institute-header-en = en-upper("İstanbul Technical University ★ " + institute-en)
-
-  // ---- Thesis level ----
-  let degree-label-tr = if degree == "phd" { "DOKTORA TEZİ" } else { "YÜKSEK LİSANS TEZİ" }
-  let degree-label-en = if degree == "phd" { "Ph.D. THESIS" } else { "M.Sc. THESIS" }
+  let is-phd = degree == "phd"
+  let degree-name-en = if degree-name-en == auto {
+    if is-phd { "Doctor of Philosophy" } else { "Master of Science" }
+  } else { degree-name-en }
 
   let full-name = (name + " " + surname).trim()
-
-  // ---- Helper joining the title lines (case-fn: case-conversion function) ----
-  let title-block(lines, case-fn) = {
-    let cleaned = lines.filter(s => s != none and str(s).trim() != "")
-    text(size: 14pt, weight: "bold")[
-      #cleaned.map(s => case-fn(s)).join(linebreak())
-    ]
-  }
+  let has(s) = s != none and str(s).trim() != ""
+  let clean-lines(lines) = lines.filter(has)
 
   // =====================================================================
   //  GLOBAL SETTINGS
@@ -139,304 +162,352 @@
     font: ("Times New Roman", "Libertinus Serif"),
     size: 12pt,
     lang: lang-code,
-    hyphenate: false,   // as in the LaTeX template (hyphenpenalty=10000): no hyphenation
+    hyphenate: false,   // front matter: no hyphenation (cls \hyphenpenalty=10000)
   )
-  set par(leading: 1.45em, spacing: 0.6em, justify: true)
-  show math.equation: set block(spacing: 0.65em)
+  // Front matter is single spaced; the body switches to 1.5 spacing.
+  set par(leading: _single, spacing: _single + _parskip, justify: true)
+  show math.equation: set block(spacing: _single + _parskip)
 
-  // ---- Heading styles ----
-  // Per LaTeX itutez.cls (\@makechapterhead): body chapters appear as "1. TITLE"
-  // (NO "BÖLÜM" prefix), 12pt bold, left-aligned. Front/back-matter headings unnumbered.
-  show heading: it => {
-    let numbered = it.numbering != none
-    if it.level == 1 {
-      // cls: level-1 headings (chapters / front-back matter) start on a recto page
-      next-recto-page
-      v(18.5mm)
-      if numbered {
-        text(weight: "bold", size: 12pt)[#counter(heading).display() #it.body]
-      } else {
-        text(weight: "bold", size: 12pt)[#it.body]
-      }
-      v(12pt)
-    } else if it.level == 2 {
-      v(12pt)
-      if numbered {
-        text(weight: "bold", size: 12pt)[#counter(heading).display() #it.body]
-      } else {
-        text(weight: "bold", size: 12pt)[#it.body]
-      }
-      v(8pt)
-    } else if it.level == 3 {
-      v(8pt)
-      if numbered {
-        text(weight: "bold", size: 12pt)[#counter(heading).display() #it.body]
-      } else {
-        text(weight: "bold", size: 12pt)[#it.body]
-      }
-      v(4pt)
-    } else {
-      v(6pt)
-      if numbered {
-        text(weight: "bold", size: 12pt)[#counter(heading).display() #it.body]
-      } else {
-        text(weight: "bold", size: 12pt)[#it.body]
-      }
-    }
-  }
+  // Lists (cls: text at 1.26 cm, label separation 0.4 cm, no extra space between items)
+  set list(indent: 0.63cm, body-indent: 0.45cm)
+  set enum(indent: 0.63cm, body-indent: 0.45cm)
+  // Block quotes: 1.25 cm from the left
+  show quote.where(block: true): it => block(inset: (left: 1.25cm), {
+    it.body
+    if it.attribution != none { linebreak(); h(1fr); [— #it.attribution] }
+  })
 
-  // ---- Figures and tables ----
-  let figure-supplement = if is-english { "Figure" } else { "Şekil" }
-  let table-supplement = if is-english { "Table" } else { "Çizelge" }
-  show figure.where(kind: image): set figure(supplement: figure-supplement)
-  show figure.where(kind: table): set figure(supplement: table-supplement)
-  show figure.where(kind: table): set figure.caption(position: top)
-  show figure.caption: it => {
-    text(weight: "bold")[#it.supplement #it.counter.display(): #it.body]
-  }
-
-  // =====================================================================
-  //  COVERS  (unnumbered pages, narrow margins)
-  // =====================================================================
+  // ---- Page geometry (cls: text 145 × 247 mm; inner 40 mm, outer 25 mm, top/bottom 25 mm;
+  //      page number 12.5 mm above the bottom edge) ----
   set page(
     paper: "a4",
-    margin: (left: 2cm, right: 2cm, top: 2cm, bottom: 2cm),
+    margin: if twoside {
+      (inside: 40mm, outside: 25mm, top: 25mm, bottom: 25mm)
+    } else {
+      (left: 40mm, right: 25mm, top: 25mm, bottom: 25mm)
+    },
+    footer-descent: 8.8mm,
+    number-align: center + bottom,
     numbering: none,
   )
 
-  // ---- Skeleton for a single cover page ----
-  // Vertical gaps follow the cls th@DisKapak/IcKapak values (55/55/27/14/22 mm)
-  // so that the date sits at the bottom of the page.
-  let cover(header, title-content, degree-label, author-line, department, program, advisor-line, date) = {
-    set par(justify: false, leading: 0.65em)
-    align(center)[
-      #underline(text(weight: "bold")[#header])
-      #v(55mm)
-      #title-content
-      #v(55mm)
-      #text(weight: "bold")[#degree-label]
-      #v(8mm)
-      #text(weight: "bold")[#author-line]
-      #v(27mm)
-      #text(weight: "bold")[#department]
-      #v(2mm)
-      #text(weight: "bold")[#program]
-      #if advisor-line != none {
-        v(14mm)
-        advisor-line
-      } else {
-        v(14mm)
-      }
-      #v(22mm)
-      #text(weight: "bold")[#date]
-    ]
+  // ---- Heading styles ----
+  // Per itutez.cls: chapters appear as "1. TITLE" (no "BÖLÜM" prefix); all headings
+  // are 12 pt bold and left-aligned. Gaps (heading → paragraph) follow the cls:
+  // level 1: 24 mm above, 24 pt below · level 2: 24 pt / 18 pt · levels 3–4: 18 pt / 12 pt.
+  let heading-label(it) = {
+    if it.numbering != none [#counter(heading).display(it.numbering) ]
+    it.body
   }
-
-  // (1) OUTER COVER
-  cover(
-    if is-english { institute-header-en } else { institute-header-tr },
-    if is-english { title-block(title-en, en-upper) } else { title-block(title-tr, tr-upper) },
-    if is-english { degree-label-en } else { degree-label-tr },
-    full-name,
-    if is-english { department-en } else { department-tr },
-    if is-english { program-en } else { program-tr },
-    // Hardcover has no advisor on the outer cover; softcover does
-    if binding == "softcover" {
-      let label = if is-english { "Thesis Advisor" } else { "Tez Danışmanı" }
-      text(weight: "bold")[#label: #(if is-english { advisor-en } else { advisor-tr })]
-    } else { none },
-    if is-english { cover-date-en } else { cover-date-tr },
-  )
-  next-recto-page
-
-  // (2) TURKISH INNER COVER
-  let advisor-block-tr = {
-    text(weight: "bold")[Tez Danışmanı: #advisor-tr]
-    if co-advisor-tr.trim() != "" {
-      linebreak()
-      text(weight: "bold")[Eş Danışman: #co-advisor-tr]
-    }
-  }
-  cover(
-    institute-header-tr, title-block(title-tr, tr-upper), degree-label-tr,
-    [#full-name (#student-id)],
-    department-tr, program-tr, advisor-block-tr, cover-date-tr,
-  )
-  next-recto-page
-
-  // (3) ENGLISH INNER COVER
-  let advisor-block-en = {
-    text(weight: "bold")[Thesis Advisor: #advisor-en]
-    if co-advisor-en.trim() != "" {
-      linebreak()
-      text(weight: "bold")[Co-Advisor: #co-advisor-en]
-    }
-  }
-  cover(
-    institute-header-en, title-block(title-en, en-upper), degree-label-en,
-    [#full-name (#student-id)],
-    department-en, program-en, advisor-block-en, cover-date-en,
-  )
-
-  // =====================================================================
-  //  JURY APPROVAL / SIGNATURE PAGE  ("KABUL VE ONAY")
-  // =====================================================================
-  {
-    set par(justify: true, leading: 1.1em)
-    next-recto-page
-    v(18mm)
-
-    // Statement paragraph
-    let degree-word-tr = if degree == "phd" { "Doktora" } else { "Yüksek Lisans" }
-    let degree-word-en = if degree == "phd" { "Ph.D." } else { "M.Sc." }
-    let quoted-title-tr = title-tr.filter(s => str(s).trim() != "").map(s => tr-upper(s)).join(" ")
-    let quoted-title-en = title-en.filter(s => str(s).trim() != "").map(s => en-upper(s)).join(" ")
-
-    if is-english {
-      [#full-name, a #degree-word-en student of ITU #institute-en student ID #student-id, successfully defended the thesis entitled "#quoted-title-en", which he/she prepared after fulfilling the requirements specified in the associated legislations, before the jury whose signatures are below.]
+  show heading: it => {
+    set text(size: 12pt, weight: "bold")
+    set par(justify: false)
+    if it.level == 1 {
+      // cls: chapters / front-back matter start on a recto page, 24 mm from the top
+      next-recto-page
+      v(24mm)
+      context block(above: 0pt, below: 24pt + par.leading, sticky: true, heading-label(it))
+    } else if it.level == 2 {
+      context block(above: 24pt + par.leading, below: 18pt + par.leading, sticky: true, heading-label(it))
+    } else if it.level <= 4 {
+      context block(above: 18pt + par.leading, below: 12pt + par.leading, sticky: true, heading-label(it))
     } else {
-      [İTÜ #institute-tr'nün #student-id numaralı #degree-word-tr Öğrencisi #full-name, ilgili yönetmeliklerin belirlediği gerekli tüm şartları yerine getirdikten sonra hazırladığı "#quoted-title-tr" başlıklı tezini aşağıda imzaları olan jüri önünde başarı ile sunmuştur.]
+      context block(above: 12pt + par.leading, below: 6pt + par.leading, sticky: true, heading-label(it))
     }
+  }
+  // Level-5 headings are not listed in the table of contents (cls)
+  show heading.where(level: 5): set heading(outlined: false)
 
-    v(14mm)
+  // ---- Figures and tables ----
+  // cls v2: captions ABOVE both figures and tables, bold "Şekil 1.1:" + italic text, centered.
+  show figure.where(kind: image): set figure(supplement: tr-en("Şekil", "Figure"))
+  show figure.where(kind: table): set figure(supplement: tr-en("Çizelge", "Table"))
+  set figure(gap: 6pt)
+  show figure: set figure.caption(position: top)
+  show figure.caption: it => {
+    strong[#it.supplement #context it.counter.display(it.numbering):]
+    [ ]
+    emph(it.body)
+  }
 
-    // Signature rows
-    let dots = "."*30
-    let signature-row(role, person, univ) = (
-      text(weight: "bold")[#role], [#text(weight: "bold")[#person] \ #univ], align(right)[#dots],
-    )
-    let empty-row = ([], [], [])
+  // =====================================================================
+  //  COVERS  (cls \th@KapakDis / \th@KapakIc — all positions from the top
+  //  edge of the page; 145 mm wide blocks centered on the page)
+  // =====================================================================
+  let logo-content = if logo == auto {
+    image("itulogo.png", width: 30mm, height: 40mm, fit: "contain")
+  } else if logo == none { none } else { box(width: 30mm, height: 40mm, logo) }
 
-    let advisor-role = if is-english { "Thesis Advisor :" } else { "Tez Danışmanı :" }
-    let co-advisor-role = if is-english { "Co-advisor :" } else { "Eş Danışman :" }
-    let jury-role = if is-english { "Jury Members :" } else { "Jüri Üyeleri :" }
+  // Text block with Word-like line boxes (Times ascent 0.891em / descent 0.216em),
+  // so the block edges coincide with the edges of the first/last line.
+  let cover-text(size, bold: false, lines) = {
+    set text(size: size, weight: if bold { "bold" } else { "regular" },
+      top-edge: 0.891em, bottom-edge: -0.216em)
+    set par(leading: 0.043em, justify: false)   // 16.1 pt (14 pt) / 13.8 pt (12 pt) line pitch
+    align(center, lines.join(linebreak()))
+  }
+  // anchor: top = block top at y; bottom = block bottom at y
+  let cover-block(y, anchor: top, content) = if anchor == top {
+    place(top + left, dx: 32.5mm, dy: y, block(width: 145mm, content))
+  } else {
+    place(bottom + left, dx: 32.5mm, dy: y - 297mm, block(width: 145mm, content))
+  }
+  let blank-page = page(margin: 0pt, numbering: none, header: none, footer: none)[]
 
-    let rows = ()
-    rows += signature-row(advisor-role,
-      if is-english { advisor-en } else { advisor-tr },
-      if is-english { advisor-univ-en } else { advisor-univ-tr })
-    if (if is-english { co-advisor-en } else { co-advisor-tr }).trim() != "" {
-      rows += empty-row
-      rows += signature-row(co-advisor-role,
-        if is-english { co-advisor-en } else { co-advisor-tr },
-        if is-english { co-advisor-univ-en } else { co-advisor-univ-tr })
+  let cover-data(l) = if l == "tr" {(
+    univ: "İSTANBUL TEKNİK ÜNİVERSİTESİ",
+    title: title-tr,
+    author: "Yazar", advisor-label: "Danışman", co-advisor-label: "Eş Danışman",
+    advisor: advisor-tr, co-advisor: co-advisor-tr,
+    kind: if is-phd { "DOKTORA TEZİ" } else { "YÜKSEK LİSANS TEZİ" },
+    purpose: (
+      (if is-phd { "Doktora" } else { "Yüksek lisans" }) + " derecesi gerekliliklerinin kısmen",
+      "yerine getirilmesi amacıyla sunulmuştur",
+    ),
+    institute: institute-tr, department: department-tr, program: program-tr,
+    id-label: "Öğrenci Numarası", date: cover-date-tr,
+  )} else {(
+    univ: "ISTANBUL TECHNICAL UNIVERSITY",
+    title: title-en,
+    author: "Author", advisor-label: "Advisor", co-advisor-label: "Co-Advisor",
+    advisor: advisor-en, co-advisor: co-advisor-en,
+    kind: if is-phd { "DOCTORAL DISSERTATION" } else { "MASTER’S THESIS" },
+    purpose: (
+      "Submitted in partial fulfillment of the requirements",
+      "for the degree of " + degree-name-en,
+    ),
+    institute: institute-en, department: department-en, program: program-en,
+    id-label: "Student Number", date: cover-date-en,
+  )}
+
+  // University name (30 mm), logo (55 mm), title (bottom at 130 mm)
+  let cover-top(d) = {
+    cover-block(30mm, cover-text(14pt, bold: true, (d.univ,)))
+    if logo-content != none { place(top + left, dx: 90mm, dy: 55mm, logo-content) }
+    cover-block(130mm, anchor: bottom, cover-text(14pt, bold: true, clean-lines(d.title)))
+  }
+
+  let outer-cover(l) = page(margin: 0pt, numbering: none, header: none, footer: none, {
+    let d = cover-data(l)
+    cover-top(d)
+    cover-block(140mm, cover-text(14pt, (full-name,)))
+    cover-block(190mm, cover-text(12pt, (d.kind,)))
+    cover-block(240mm, cover-text(12pt, (d.institute, d.department, d.program, [], d.date)))
+  })
+
+  let inner-cover(l, first: false) = page(margin: 0pt, numbering: none, header: none, footer: none, {
+    // cls: the first inner cover is page i (roman numbering starts here, unprinted)
+    if first { counter(page).update(1) }
+    let d = cover-data(l)
+    cover-top(d)
+    let people = ([#d.author: #full-name], [#d.advisor-label: #d.advisor])
+    if has(d.co-advisor) { people.push([#d.co-advisor-label: #d.co-advisor]) }
+    cover-block(140mm, cover-text(14pt, people))
+    cover-block(190mm, cover-text(12pt, (d.kind, ..d.purpose)))
+    cover-block(240mm, cover-text(12pt,
+      (d.institute, d.department, d.program, [#d.id-label: #student-id], d.date)))
+  })
+
+  // Outer cover (thesis language) → inner cover (thesis language) → inner cover
+  // (other language); the back of each page is left blank.
+  let other-lang = if is-english { "tr" } else { "en" }
+  outer-cover(lang-code)
+  blank-page
+  inner-cover(lang-code, first: true)
+  blank-page
+  inner-cover(other-lang)
+  blank-page
+
+  // =====================================================================
+  //  JURY APPROVAL PAGE + ACADEMIC INTEGRITY DECLARATION
+  //  (cls \th@onaypage / \th@AkademikDurustluk: text starts 50 mm from the
+  //  top of the page; signature table columns 41 / 70 / 34 mm)
+  // =====================================================================
+  let signature-line = box(width: 32mm, height: 0.8em, baseline: 0.15em, stroke: (bottom: 0.5pt))
+  let signature-row(label, person, univ: none, height: 20mm, line: true) = grid(
+    columns: (41mm, 70mm, 34mm),
+    rows: height,
+    label,
+    { person; if has(univ) { linebreak(); univ } },
+    if line { signature-line },
+  )
+  let statement-page(content) = page(numbering: none, {
+    set par(justify: true)
+    set block(spacing: 0pt)
+    v(25mm)
+    content
+  })
+
+  let approval-title = if approval-title != none { approval-title } else {
+    clean-lines(if is-english { title-en } else { title-tr }).join(" ")
+  }
+  let advisor = tr-en(advisor-tr, advisor-en)
+  let co-advisor = tr-en(co-advisor-tr, co-advisor-en)
+
+  statement-page({
+    block(height: 40mm, width: 100%, if is-english [
+      #full-name, a #(if is-phd [doctoral] else [master’s]) student at Istanbul Technical
+      University #institute-en, student number #student-id, having fulfilled all the
+      requirements set forth in the relevant regulations, has successfully defended the
+      #(if is-phd [dissertation] else [thesis]) titled #emph(approval-title) before the jury
+      whose signatures appear below; the #(if is-phd [dissertation] else [thesis]) has been
+      found to meet the required standards in terms of scope and quality for a
+      #(if is-phd [doctoral] else [master’s]) degree.
+    ] else [
+      İstanbul Teknik Üniversitesi #(institute-tr)nün #student-id numaralı
+      #(if is-phd [doktora] else [yüksek lisans]) öğrencisi #full-name, ilgili yönetmeliklerde
+      belirtilen tüm şartları yerine getirdikten sonra hazırladığı #emph(approval-title)
+      başlıklı tezini, aşağıda imzaları bulunan jüri önünde başarıyla savunmuş; tez, kapsam ve
+      nitelik bakımından #(if is-phd [doktora] else [yüksek lisans]) derecesi için yeterli
+      bulunmuştur.
+    ])
+    signature-row(tr-en("Danışman:", "Advisor:"), advisor,
+      univ: tr-en(advisor-univ-tr, advisor-univ-en))
+    if has(co-advisor) {
+      signature-row(tr-en("Eş Danışman:", "Co-Advisor:"), co-advisor,
+        univ: tr-en(co-advisor-univ-tr, co-advisor-univ-en))
     }
-    // Jury members
     for (i, member) in jury.enumerate() {
-      rows += empty-row
-      rows += signature-row(if i == 0 { jury-role } else { "" }, member.name, member.at("univ", default: ""))
+      signature-row(if i == 0 { tr-en("Jüri Üyeleri:", "Jury Members:") }, member.name,
+        univ: member.at("univ", default: none))
     }
+    v(20mm)
+    signature-row(tr-en("Savunma Tarihi:", "Date of Defense:"),
+      tr-en(defense-date-tr, defense-date-en), line: false)
+  })
+  blank-page
 
-    grid(
-      columns: (34mm, 1fr, auto),
-      row-gutter: 10pt,
-      column-gutter: 4pt,
-      align: (left + top, left + top, right + bottom),
-      ..rows,
-    )
-
-    v(8mm)
-    let submission-label = if is-english { "Date of Submission :" } else { "Teslim Tarihi :" }
-    let defense-label = if is-english { "Date of Defense :" } else { "Savunma Tarihi :" }
-    grid(
-      columns: (auto, auto),
-      row-gutter: 6pt,
-      column-gutter: 8pt,
-      text(weight: "bold")[#submission-label],
-      text(weight: "bold")[#(if is-english { submission-date-en } else { submission-date-tr })],
-      text(weight: "bold")[#defense-label],
-      text(weight: "bold")[#(if is-english { defense-date-en } else { defense-date-tr })],
-    )
-  }
+  statement-page({
+    block(height: 35mm, width: 100%, if is-english [
+      I declare that all data and information in this #(if is-phd [dissertation] else [thesis])
+      have been obtained and presented in accordance with the principles of academic integrity
+      and ethical conduct. Furthermore, in accordance with said principles, I declare that the
+      entire intellectual content of the manuscript is my own original work, except in cases
+      where contributions from other individuals, institutions, or Generative AI tools are
+      explicitly stated.
+    ] else [
+      Bu tezde yer alan tüm veri ve bilgilerin akademik dürüstlük ve etik davranış ilkeleri
+      doğrultusunda elde edildiğini ve sunulduğunu beyan ederim. Ayrıca, söz konusu ilkeler
+      gereğince, başka kişi, kurum veya Üretken Yapay Zekâ araçlarının katkılarının açıkça
+      belirtildiği durumlar haricinde, tezin entelektüel içeriğinin tamamının tarafıma ait özgün
+      bir çalışma niteliği taşıdığını da beyan ederim.
+    ])
+    signature-row(tr-en("Yazar:", "Author:"), full-name)
+    v(65mm)
+    block(height: 25mm, width: 100%, if is-english [
+      I hereby declare that I have fulfilled my advisory responsibilities regarding the
+      monitoring and guidance of the research and writing process of this
+      #(if is-phd [dissertation] else [thesis]) in accordance with the principles of academic
+      integrity and ethical conduct.
+    ] else [
+      Bu #(if is-phd [doktora] else [yüksek lisans]) tezinin araştırma ve yazım sürecinin
+      izlenmesi ve yönlendirilmesi konusundaki danışmanlık sorumluluklarımı akademik dürüstlük
+      ve etik davranış ilkeleri doğrultusunda yerine getirdiğimi beyan ederim.
+    ])
+    signature-row(tr-en("Danışman:", "Advisor:"), advisor, height: 15mm)
+    if has(co-advisor) { signature-row(tr-en("Eş Danışman:", "Co-Advisor:"), co-advisor) }
+  })
+  blank-page
 
   // =====================================================================
-  //  FRONT MATTER  (roman numerals, regular margins)
+  //  FRONT MATTER  (roman numerals continue from the inner cover)
   // =====================================================================
-  // Advance to a recto page BEFORE resetting the page counter so that the
-  // visible roman numbers stay aligned with the physical page parity.
-  next-recto-page
-  // Two-sided: inner (binding) 4 cm / outer 2.5 cm gutter; one-sided: fixed left 4 cm
-  set page(
-    margin: if twoside {
-      (inside: 4cm, outside: 2.5cm, top: 2.5cm, bottom: 2.5cm)
-    } else {
-      (left: 4cm, right: 2.5cm, top: 2.5cm, bottom: 2.5cm)
-    },
-    numbering: "i",
-    number-align: center + bottom,
-  )
-  counter(page).update(1)
-
-  // Front/back-matter headings are unnumbered
+  set page(numbering: "i")
   set heading(numbering: none)
-  // LaTeX uses single spacing in front matter (\singlespacing); body is 1.5 (\oneandonehalf)
-  set par(leading: 0.65em)
-  // cls uses \leaders with spaced dot fill (TOC + list of tables/figures);
-  // Typst's default fill is too dense, so add a gap between the dots.
+  // cls: dotted leaders in the table of contents and the lists of tables/figures
   set outline.entry(fill: repeat(gap: 2.5pt)[.])
+  // cls/tocloft: chapters at 0, sections 4 mm, subsections 8.5 mm, deeper 12.7 mm
+  set outline(indent: n => (0mm, 4mm, 8.5mm, 12.7mm).at(n, default: 12.7mm))
 
-  // "Sayfa" / "Page" column header (cls: \cftaftertoctitle ... \bf\underline{Sayfa})
-  let page-label = if is-english { "Page" } else { "Sayfa" }
+  // "Sayfa" / "Page" column header: 20 pt below the list title, 12 pt above the entries
+  let page-column-label = block(above: 24pt, below: 12pt + _single, width: 100%,
+    align(right, strong(underline(tr-en("Sayfa", "Page")))))
 
-  // ---- DEDICATION ---- (cls: \vspace*{0.4\textheight}, then right-aligned)
-  if dedication != none and str(dedication).trim() != "" {
-    v(40%)
-    align(right)[#emph(strong(dedication))]
-    pagebreak(weak: true)
+  // ---- DEDICATION ---- (130 mm from the top of the page, right-aligned, back blank)
+  if has(dedication) {
+    page(numbering: none, {
+      v(105mm)
+      align(right, text(weight: "bold", style: "italic", dedication))
+    })
+    blank-page
   }
 
-  // ---- FOREWORD ----
+  // ---- PREFACE ---- (author's name 11.24 cm from the left; right-aligned if longer)
   if foreword != none {
-    heading(level: 1, if is-english { "FOREWORD" } else { "ÖNSÖZ" })
+    heading(level: 1, tr-en("ÖNSÖZ", "PREFACE"))
     foreword
+    context {
+      let n = [#full-name]
+      let w = measure(n).width
+      block(above: _single + _parskip, width: 100%, if w < 145mm - 112.4mm { pad(left: 112.4mm, n) } else { align(right, n) })
+    }
   }
 
-  // ---- TABLE OF CONTENTS ----
-  // cls adds the TOC to its own list as well (\addcontentsline{toc}{chapter}{...\contentsnameToC})
-  heading(level: 1, if is-english { "TABLE OF CONTENTS" } else { "İÇİNDEKİLER" })
-  align(right)[#strong(underline(page-label))]
-  [
-    // Chapter and front/back-matter (level-1) entries are bold — as in the cls
-    #show outline.entry.where(level: 1): strong
-    #outline(title: none, depth: 4, indent: auto)
-  ]
+  // ---- TABLE OF CONTENTS ---- (lists itself, as in the cls)
+  heading(level: 1, tr-en("İÇİNDEKİLER", "TABLE OF CONTENTS"))
+  page-column-label
+  {
+    set par(spacing: _single)
+    // Chapters and front/back-matter (level-1) entries are bold
+    show outline.entry.where(level: 1): strong
+    outline(title: none, depth: 4)
+  }
 
-  // ---- ABBREVIATIONS ----
+  // ---- ABBREVIATIONS / SYMBOLS ---- (single spacing, no space between entries)
   if abbreviations != none {
-    heading(level: 1, if is-english { "ABBREVIATIONS" } else { "KISALTMALAR" })
+    heading(level: 1, tr-en("KISALTMALAR", "ABBREVIATIONS"))
+    set par(spacing: _single)
     abbreviations
   }
-
-  // ---- SYMBOLS ----
   if symbols != none {
-    heading(level: 1, if is-english { "SYMBOLS" } else { "SEMBOLLER" })
+    heading(level: 1, tr-en("SEMBOLLER", "SYMBOLS"))
+    set par(spacing: _single)
     symbols
   }
 
-  // ---- LIST OF TABLES ----
+  // ---- LISTS OF TABLES / FIGURES ---- ("Şekil 1.1: " in a 5.5 em column, caption italic)
+  let figure-entry(it) = link(it.element.location(), {
+    let label = [#it.prefix(): ]
+    let column = 66pt   // 5.5 em at 12 pt
+    par(hanging-indent: column, justify: false, context {
+      if measure(label).width < column { box(width: column, label) } else { label }
+      emph(it.body())
+      box(width: 1fr, it.fill)
+      it.page()
+    })
+  })
   if list-of-tables {
-    heading(level: 1, if is-english { "LIST OF TABLES" } else { "ÇİZELGE LİSTESİ" })
-    align(right)[#strong(underline(page-label))]
+    heading(level: 1, tr-en("ÇİZELGE LİSTESİ", "LIST OF TABLES"))
+    page-column-label
+    show outline.entry: figure-entry
+    set par(spacing: _single)
     outline(title: none, target: figure.where(kind: table))
   }
-
-  // ---- LIST OF FIGURES ----
   if list-of-figures {
-    heading(level: 1, if is-english { "LIST OF FIGURES" } else { "ŞEKİL LİSTESİ" })
-    align(right)[#strong(underline(page-label))]
+    heading(level: 1, tr-en("ŞEKİL LİSTESİ", "LIST OF FIGURES"))
+    page-column-label
+    show outline.entry: figure-entry
+    set par(spacing: _single)
     outline(title: none, target: figure.where(kind: image))
   }
 
-  // ---- ÖZET / SUMMARY ----
-  // Turkish theses put ÖZET first; English theses put SUMMARY first
-  let abstract-tr-block = if abstract-tr != none {
-    heading(level: 1, "ÖZET")
-    abstract-tr
+  // ---- ÖZET / ABSTRACT ----
+  // cls: thesis title centered (24 mm from the top), 44 pt gap, centered heading, then the text.
+  // Turkish theses put ÖZET first; English theses put ABSTRACT first.
+  let abstract-page(title-lines, heading-text, content) = {
+    next-recto-page
+    v(24mm)
+    block(above: 0pt, below: 44pt + _single, width: 100%,
+      cover-text(12pt, bold: true, clean-lines(title-lines)))
+    {
+      show heading: it => block(above: 0pt, below: 24pt + _single, width: 100%,
+        align(center, text(size: 12pt, weight: "bold", it.body)))
+      heading(level: 1, heading-text)
+    }
+    content
   }
-  let abstract-en-block = if abstract-en != none {
-    heading(level: 1, "SUMMARY")
-    abstract-en
-  }
+  let abstract-tr-block = if abstract-tr != none { abstract-page(title-tr, "ÖZET", abstract-tr) }
+  let abstract-en-block = if abstract-en != none { abstract-page(title-en, "ABSTRACT", abstract-en) }
   if is-english {
     abstract-en-block
     abstract-tr-block
@@ -445,13 +516,10 @@
     abstract-en-block
   }
 
-  // Body and everything after (bibliography, appendices, CV) return to 1.5 line spacing
-  set par(leading: 1.45em)
-
   // =====================================================================
-  //  BODY  (arabic numerals, numbered chapters — first chapter on a recto page)
+  //  BODY  (arabic numerals, numbered chapters, 1.5 spacing — first chapter recto)
   // =====================================================================
-  // Reset the counter on a physical odd page (parity alignment) — first chapter starts recto
+  // Reset the counter on a physical odd page (parity alignment)
   next-recto-page
   set page(numbering: "1")
   counter(page).update(1)
@@ -463,34 +531,59 @@
       let p = n.pos()
       if p.len() == 1 { numbering("1.", p.at(0)) } else { numbering("1.1.1.1", ..p) }
     })
-    #set par(leading: 1.45em)   // body: 1.5 line spacing (\oneandonehalf)
+    // Figures and tables are numbered per chapter: Şekil 1.1, Çizelge 2.3, ...
+    #set figure(numbering: n => numbering("1.1", counter(heading).get().first(), n))
+    #show heading.where(level: 1): it => {
+      counter(figure.where(kind: image)).update(0)
+      counter(figure.where(kind: table)).update(0)
+      it
+    }
+    // Body: 1.5 spacing; hyphenation allowed when needed (cls \hyphenpenalty=1000)
+    #set par(leading: _onehalf, spacing: _onehalf + _parskip)
+    #set text(hyphenate: true, costs: (hyphenation: 300%))
+    #show math.equation: set block(spacing: _onehalf + _parskip)
     #body
   ]
 
   // =====================================================================
-  //  BIBLIOGRAPHY
+  //  BIBLIOGRAPHY  (single spacing, 12 pt between entries)
   // =====================================================================
   if bibliography != none {
+    set par(leading: _single, spacing: _single + _parskip)
+    set block(spacing: _single + _parskip)
     bibliography
   }
 
   // =====================================================================
   //  APPENDICES
+  //  cls: "EKLER" heading; the first appendix follows on the same page 24 pt
+  //  below it, each further appendix starts on a new page. Appendix titles are
+  //  listed in the TOC like sections; figures/tables are numbered A.1, B.1, ...
   // =====================================================================
   if appendices != none {
-    heading(level: 1, if is-english { "APPENDICES" } else { "EKLER" })
+    heading(level: 1, tr-en("EKLER", "APPENDICES"))
+    let appendix-counter = counter("itu-thesis-appendix")
+    set heading(offset: 1)
+    set figure(numbering: n => numbering("A.1", appendix-counter.get().first(), n))
+    show heading.where(level: 2): it => {
+      appendix-counter.step()
+      counter(figure.where(kind: image)).update(0)
+      counter(figure.where(kind: table)).update(0)
+      context if appendix-counter.get().first() > 1 { pagebreak(weak: true) }
+      context block(above: 24pt + par.leading, below: 6pt + _parskip + par.leading, sticky: true,
+        text(size: 12pt, weight: "bold", it.body))
+    }
     appendices
   }
 
   // =====================================================================
-  //  CURRICULUM VITAE
+  //  CURRICULUM VITAE  (single spacing)
   // =====================================================================
   if cv != none {
-    heading(level: 1, if is-english { "CURRICULUM VITAE" } else { "ÖZGEÇMİŞ" })
+    heading(level: 1, tr-en("ÖZGEÇMİŞ", "CURRICULUM VITAE"))
+    set par(leading: _single, spacing: _single + _parskip)
     // In the cls the CV is plain text; keep any headings inside it out of the TOC.
-    {
-      set heading(outlined: false)
-      cv
-    }
+    set heading(outlined: false)
+    cv
   }
 }

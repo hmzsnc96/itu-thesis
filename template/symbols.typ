@@ -1,18 +1,12 @@
 // SYMBOLS content — the "SEMBOLLER" heading is added by the template.
-// As in the LaTeX template: bold symbol, then " : " and the description (no header row).
+// As in the LaTeX template (\sembol): bold "SYMBOL:" in a 25 mm column.
 
-#grid(
-  columns: (auto, auto, 1fr),
-  column-gutter: (1.5em, 0.6em),
-  row-gutter: 0.7em,
-  [$alpha$], [:], [Açı, alfa açısı],
-  [$beta$], [:], [Açı, beta açısı],
-  [$gamma$], [:], [Açı, gama açısı],
-  [$Delta E$], [:], [Enerji farkı],
-  [$sigma$], [:], [Standart sapma],
-  [$theta$], [:], [Sıcaklık],
-  [$lambda$], [:], [Dalga boyu],
-  [$mu$], [:], [Ortalama, mikro],
-  [$pi$], [:], [Pi sayısı],
-  [$rho$], [:], [Yoğunluk],
-)
+#import "@preview/community-itu-thesis:0.3.0": symbol-entry
+
+#symbol-entry[$C$][Kapasitans]
+#symbol-entry[$t$][Zaman]
+#symbol-entry[$u, v$][Yer değiştirme vektörü bileşenleri]
+#symbol-entry[$bold(alpha)$][Asal gerilme doğrultusundan sapma açısı]
+#symbol-entry[$bold(rho)$][Yoğunluk]
+#symbol-entry[$bold(sigma)_x, bold(sigma)_y, bold(sigma)_(x y)$][Kabuk iç gerilmeleri]
+#symbol-entry[$bold(zeta)$][Bir satırı aşan sembol açıklaması örneği, bir satırı aşan sembol açıklaması örneği]

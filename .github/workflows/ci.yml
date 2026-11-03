@@ -20,16 +20,16 @@ jobs:
         with:
           typst-version: latest
 
-      - name: Install the package locally (@local/community-itu-thesis:0.2.0)
+      - name: Install the package locally (@local/community-itu-thesis:0.3.0)
         run: |
-          DEST="$HOME/.local/share/typst/packages/local/community-itu-thesis/0.2.0"
+          DEST="$HOME/.local/share/typst/packages/local/community-itu-thesis/0.3.0"
           mkdir -p "$DEST"
-          cp -r typst.toml lib.typ template README.md LICENSE "$DEST/"
+          cp -r typst.toml lib.typ itulogo.png template README.md LICENSE "$DEST/"
 
       - name: Compile the samples (NUM + APA)
         run: |
           cp -r template /tmp/test
-          sed -i 's#@preview/community-itu-thesis:0.2.0#@local/community-itu-thesis:0.2.0#g' \
+          sed -i 's#@preview/community-itu-thesis:0.3.0#@local/community-itu-thesis:0.3.0#g' \
             /tmp/test/main.typ /tmp/test/main-apa.typ
           typst compile /tmp/test/main.typ      /tmp/test/tez-num.pdf
           typst compile /tmp/test/main-apa.typ  /tmp/test/tez-apa.pdf

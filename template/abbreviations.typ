@@ -1,19 +1,13 @@
 // ABBREVIATIONS content — the "KISALTMALAR" heading is added by the template.
-// As in the LaTeX template: bold abbreviation, then " : " and the description (no header row).
+// As in the LaTeX template (\kisaltma): bold "TERM:" in a 25 mm column; long
+// descriptions wrap aligned with their first line.
 
-#grid(
-  columns: (auto, auto, 1fr),
-  column-gutter: (1.5em, 0.6em),
-  row-gutter: 0.7em,
-  [*API*], [:], [Application Programming Interface],
-  [*CPU*], [:], [Central Processing Unit],
-  [*GPU*], [:], [Graphics Processing Unit],
-  [*HTML*], [:], [HyperText Markup Language],
-  [*HTTP*], [:], [HyperText Transfer Protocol],
-  [*JSON*], [:], [JavaScript Object Notation],
-  [*RGB*], [:], [Red, Green, Blue],
-  [*SQL*], [:], [Structured Query Language],
-  [*UI*], [:], [User Interface],
-  [*UX*], [:], [User Experience],
-  [*XML*], [:], [Extensible Markup Language],
-)
+#import "@preview/community-itu-thesis:0.3.0": abbreviation
+
+#abbreviation[AIC][_Akaike information criterion_ (Akaike ölçütü)]
+#abbreviation[API][_Application Programming Interface_ (Uygulama Programlama Arayüzü)]
+#abbreviation[CPU][_Central Processing Unit_ (Merkezi İşlem Birimi)]
+#abbreviation[GPU][_Graphics Processing Unit_ (Grafik İşlem Birimi)]
+#abbreviation[JSON][_JavaScript Object Notation_]
+#abbreviation[SQL][_Structured Query Language_ (Yapılandırılmış Sorgu Dili)]
+#abbreviation[TENMAK][Türkiye Enerji, Nükleer ve Maden Araştırma Kurumu]

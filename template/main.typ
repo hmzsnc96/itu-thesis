@@ -3,7 +3,7 @@
 //
 // Compile:  typst compile main.typ tez.pdf
 
-#import "@preview/community-itu-thesis:0.2.0": thesis
+#import "@preview/community-itu-thesis:0.3.0": thesis
 
 #show: thesis.with(
   // ===== PERSONAL INFORMATION =====
@@ -22,6 +22,8 @@
     "SECOND LINE IF NECESSARY",
     "THIRD LINE IF NECESSARY",
   ),
+  // Title inside the approval-page sentence (title case); default: title lines joined
+  approval-title: "Tez Başlığının Birinci Satırı: Alt Başlık Varsa İki Noktadan Sonra",
 
   // ===== ACADEMIC INFORMATION =====
   department-tr: "Bilgisayar Mühendisliği Anabilim Dalı",
@@ -51,8 +53,6 @@
   // ===== DATES =====
   cover-date-tr: "Aralık 2024",
   cover-date-en: "December 2024",
-  submission-date-tr: "22 Eylül 2024",
-  submission-date-en: "22 September 2024",
   defense-date-tr: "21 Aralık 2024",
   defense-date-en: "21 December 2024",
 
@@ -60,6 +60,7 @@
   lang: "tr",               // "tr" / "en"
   degree: "masters",        // "masters" / "phd"
   binding: "hardcover",     // "hardcover" / "softcover"
+  // degree-name-en: "Master of Arts",  // English inner cover; default Master of Science / Doctor of Philosophy
 
   // ===== FRONT/BACK MATTER =====
   dedication: "Aileme,",
