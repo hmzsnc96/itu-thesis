@@ -175,7 +175,9 @@
   //           "one-sided" (no recto alignment, fixed left margin)
   // The backs of the covers, approval, integrity and dedication pages are blank in both.
   printing: "two-sided",
-  logo: auto,               // Cover logo: auto = official ITU logo, none = no logo, or an image(...)
+  // Cover logo (30 × 40 mm): image("itulogo.png") with the official ITU logo in your
+  // project (not bundled: trademark); auto = visible placeholder; none = empty slot.
+  logo: auto,
 
   // ===== FRONT/BACK MATTER (content blocks) =====
   dedication: none,         // Dedication text (e.g. "Aileme,")
@@ -356,8 +358,14 @@
   //  COVERS  (cls \th@KapakDis / \th@KapakIc — all positions from the top
   //  edge of the page; 145 mm wide blocks centered on the page)
   // =====================================================================
+  // The ITU logo is a registered trademark and is not bundled with the package.
+  // Without `logo`, a clearly visible placeholder marks the 30 × 40 mm slot so a
+  // missing logo cannot go unnoticed; `logo: none` leaves the slot empty on purpose.
   let logo-content = if logo == auto {
-    image("itulogo.png", width: 30mm, height: 40mm, fit: "contain")
+    rect(width: 30mm, height: 40mm, stroke: (paint: luma(150), dash: "dashed", thickness: 0.6pt),
+      align(center + horizon, text(size: 8pt, fill: luma(110), font: "Libertinus Serif")[
+        İTÜ logo \ #v(1mm) `logo: image(...)`
+      ]))
   } else if logo == none { none } else { box(width: 30mm, height: 40mm, logo) }
 
   // Text block with Word-like line boxes (Times ascent 0.891em / descent 0.216em),

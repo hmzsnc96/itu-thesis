@@ -60,6 +60,9 @@
   lang: "tr",               // "tr" / "en"
   degree: "masters",        // "masters" / "phd"
   binding: "hardcover",     // "hardcover" / "softcover"
+  // Official İTÜ logo on the covers: put the file in your project folder
+  // (see README, "Cover logo") and uncomment the next line.
+  // logo: image("itulogo.png"),
   // degree-name-en: "Master of Arts",  // English inner cover; default Master of Science / Doctor of Philosophy
 
   // ===== FRONT/BACK MATTER =====

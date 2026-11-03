@@ -24,7 +24,7 @@ jobs:
         run: |
           DEST="$HOME/.local/share/typst/packages/local/community-itu-thesis/0.3.0"
           mkdir -p "$DEST"
-          cp -r typst.toml lib.typ itulogo.png template README.md LICENSE "$DEST/"
+          cp -r typst.toml lib.typ template README.md LICENSE "$DEST/"
 
       - name: Compile the samples (NUM + APA)
         run: |

@@ -23,7 +23,7 @@ match your own thesis.
 
 ## Features
 
-- Outer cover + inner covers in both languages (official v2 layout with the ITU logo)
+- Outer cover + inner covers in both languages (official v2 layout)
 - Jury approval page and academic integrity declaration
 - Dedication, Preface, Table of Contents, Abbreviations, Symbols
 - List of Tables and List of Figures (automatic, captions above, figures numbered per chapter)
@@ -56,7 +56,7 @@ The main parameters of the `#show: thesis.with(...)` call:
 | `degree-name-en` | Degree on the English inner cover (default `auto`: Master of Science / Doctor of Philosophy) |
 | `binding` | `"hardcover"` (cloth/bez) or `"softcover"` (cardboard/karton); same covers since v2 |
 | `printing` | `"two-sided"` (default) or `"one-sided"`; the backs of the covers, approval, integrity and dedication pages are blank in both |
-| `logo` | Cover logo: `auto` (official ITU logo), `none`, or an `image(...)` |
+| `logo` | Cover logo: `image("itulogo.png")` (see below), `auto` (visible placeholder, default) or `none` |
 | `dedication`, `foreword`, `abbreviations`, `symbols`, `abstract-tr`, `abstract-en`, `appendices`, `cv` | Front/back-matter content |
 | `list-of-figures`, `list-of-tables` | Produce the lists? (default `true`) |
 | `bibliography` | `bibliography("refs.bib", style: "ieee", title: "KAYNAKLAR")` |
@@ -64,6 +64,16 @@ The main parameters of the `#show: thesis.with(...)` call:
 Helpers for the content files: `abbreviation(term, description)` and
 `symbol-entry(term, description)` for the abbreviation/symbol lists, and
 `cv-heading`, `cv-education`, `cv-publication` for the CV.
+
+### Cover logo
+
+The official covers show the İTÜ logo (30 × 40 mm). The logo is a registered
+trademark of Istanbul Technical University and is **not** included in this
+package or covered by its license. Take `fig/itulogo.png` from the official
+thesis template distributed by the İTÜ Graduate School, put it in your project
+folder and pass `logo: image("itulogo.png")`. Until you do, the covers show a
+dashed placeholder so a missing logo cannot go unnoticed; `logo: none` leaves
+the slot empty.
 
 ### Input checks
 
@@ -86,7 +96,7 @@ the style via the `bibliography` parameter: `style: "ieee"` (numeric) or
 
 ## Changes in 0.3.0 (official template v2.0.0)
 
-- New covers: university name, ITU logo, title, author/advisor block, thesis type
+- New covers: university name, logo slot, title, author/advisor block, thesis type
   and institute block at the official positions; no automatic uppercasing of titles.
 - New approval page text (submission date removed) and the new academic integrity
   declaration page.

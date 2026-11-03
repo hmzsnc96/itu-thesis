@@ -48,6 +48,9 @@
   lang: "tr",
   degree: "masters",
   binding: "hardcover",
+  // Official İTÜ logo on the covers: put the file in your project folder
+  // (see README, "Cover logo") and uncomment the next line.
+  // logo: image("itulogo.png"),
 
   dedication: "Aileme,",
   foreword: include "foreword.typ",
