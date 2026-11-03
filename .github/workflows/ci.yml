@@ -30,7 +30,7 @@ jobs:
         run: |
           cp -r template /tmp/test
           sed -i 's#@preview/community-itu-thesis:0.3.0#@local/community-itu-thesis:0.3.0#g' \
-            /tmp/test/main.typ /tmp/test/main-apa.typ
+            /tmp/test/*.typ
           typst compile /tmp/test/main.typ      /tmp/test/tez-num.pdf
           typst compile /tmp/test/main-apa.typ  /tmp/test/tez-apa.pdf
 
