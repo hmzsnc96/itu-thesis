@@ -42,6 +42,82 @@
 /// CV publication entry (cls \cvyayin): 1.25 cm hanging indent.
 #let cv-publication(entry) = par(hanging-indent: 12.5mm, entry)
 
+// =====================================================================
+//  INPUT CHECKS (poka-yoke)
+//  Reject values that would silently produce a wrong thesis (e.g. a typo in
+//  `degree` printing "YÜKSEK LİSANS TEZİ" on a PhD cover) and accept common
+//  alternative spellings, including the LaTeX class option names.
+//  Only definite mistakes are errors: Typst has no warnings, and an error
+//  stops compilation, so incomplete drafts (empty fields) are allowed.
+// =====================================================================
+#let _fail(msg) = panic("community-itu-thesis: " + msg)
+
+#let _has(x) = if x == none { false } else if type(x) == str { x.trim() != "" } else if type(x) == content { x != [] } else { true }
+
+// Lowercase, drop Turkish diacritics and unify separators: "Yüksek Lisans" → "yuksek-lisans"
+#let _norm(s) = {
+  let s = lower(s.trim()).replace("\u{307}", "")
+  for (a, b) in (("ı", "i"), ("ü", "u"), ("ş", "s"), ("ç", "c"), ("ğ", "g"), ("ö", "o"), (" ", "-"), ("_", "-")) {
+    s = s.replace(a, b)
+  }
+  s
+}
+
+// Map a setting to its canonical value; options: (canonical: (alias, ...), ...)
+#let _choice(param, value, options) = {
+  let key = if type(value) == str { _norm(value) } else { value }
+  for (canonical, aliases) in options {
+    if key == canonical or key in aliases { return canonical }
+  }
+  _fail("invalid `" + param + "`: " + repr(value) + ". Valid values: "
+    + options.keys().map(k => "\"" + k + "\"").join(", ") + ".")
+}
+
+// Title: a single string/content or an array of up to 3 lines (official limit)
+#let _title(param, value) = {
+  let lines = if type(value) == array { value } else { (value,) }
+  lines = lines.filter(_has)
+  if lines.len() > 3 {
+    _fail("`" + param + "` has " + str(lines.len()) + " lines; the official template allows at most 3.")
+  }
+  lines
+}
+
+// Jury: accepts (name: ..., univ: ...), ("Name", "University") or "Name" entries,
+// and a single member written without the trailing comma.
+#let _jury(value) = {
+  let members = if type(value) == dictionary { (value,) } else { value }
+  if type(members) != array {
+    _fail("`jury` must be an array of (name: \"...\", univ: \"...\") entries.")
+  }
+  members.map(m => {
+    if type(m) == dictionary {
+      for k in m.keys() {
+        if k not in ("name", "univ") {
+          _fail("unknown key `" + k + "` in jury member " + repr(m) + "; use (name: \"...\", univ: \"...\").")
+        }
+      }
+      if "name" not in m { _fail("jury member without `name`: " + repr(m)) }
+      (name: m.name, univ: m.at("univ", default: none))
+    } else if type(m) == array and m.len() in (1, 2) {
+      (name: m.at(0), univ: m.at(1, default: none))
+    } else if type(m) in (str, content) {
+      (name: m, univ: none)
+    } else {
+      _fail("invalid jury member: " + repr(m) + ". Use (name: \"...\", univ: \"...\").")
+    }
+  }).filter(m => _has(m.name))
+}
+
+// Content parameters: catch a file name passed instead of `include "file.typ"`
+#let _content(param, value) = {
+  if type(value) == str and value.trim().ends-with(".typ") {
+    _fail("`" + param + "` got the file name " + repr(value) + "; write `" + param
+      + ": include \"" + value.trim() + "\"` to insert the file.")
+  }
+  value
+}
+
 #let thesis(
   // ===== PERSONAL INFORMATION =====
   name: "",
@@ -116,15 +192,56 @@
 
   body,
 ) = {
+  // ---- Input checks (see _choice, _title, _jury, _content above) ----
+  let lang = _choice("lang", lang, (tr: ("turkish", "turkce"), en: ("english", "ingilizce")))
+  let degree = _choice("degree", degree, (
+    masters: ("master", "masters", "msc", "m.sc.", "ms", "yuksek-lisans", "yukseklisans"),
+    phd: ("ph.d.", "doctoral", "doctorate", "doktora"),
+  ))
+  let binding = _choice("binding", binding, (
+    hardcover: ("bez", "cloth", "ciltli"),
+    softcover: ("karton", "paperback"),
+  ))
+  let printing = _choice("printing", printing, (
+    "two-sided": ("twoside", "twosided", "double-sided", "onluarkali", "cift-yonlu"),
+    "one-sided": ("oneside", "onesided", "single-sided", "tekyonlu", "tek-yonlu"),
+  ))
+  let institute = _choice("institute", institute, (
+    graduate: ("lisansustuegitim", "lisansustu-egitim", "lisansustu", "graduate-school"),
+    informatics: ("bilisim",),
+    science: ("fenbilimleri", "fen-bilimleri", "fen"),
+    social-sciences: ("sosyalbilimler", "sosyal-bilimler", "sosyal", "social"),
+    energy: ("enerji",),
+    eurasia: ("avrasya",),
+  ))
+  let title-tr = _title("title-tr", title-tr)
+  let title-en = _title("title-en", title-en)
+  let jury = _jury(jury)
+  let dedication = _content("dedication", dedication)
+  let foreword = _content("foreword", foreword)
+  let abbreviations = _content("abbreviations", abbreviations)
+  let symbols = _content("symbols", symbols)
+  let abstract-tr = _content("abstract-tr", abstract-tr)
+  let abstract-en = _content("abstract-en", abstract-en)
+  let appendices = _content("appendices", appendices)
+  let cv = _content("cv", cv)
+  if type(bibliography) == str {
+    _fail("`bibliography` got the string " + repr(bibliography)
+      + "; write `bibliography: bibliography(\"refs.bib\", ...)` instead.")
+  }
+  if type(logo) == str {
+    _fail("`logo` got the string " + repr(logo) + "; write `logo: image(\"" + logo + "\")` instead.")
+  }
+
   // ---- Language ----
-  let is-english = lang == "en" or lang == "english"
-  let lang-code = if is-english { "en" } else { "tr" }
+  let is-english = lang == "en"
+  let lang-code = lang
   let tr-en(tr, en) = if is-english { en } else { tr }
 
   // ---- Printing (two-/one-sided) ----
   // cls onluarkali = twoside: chapters start on a recto (right) page,
   // blank pages are inserted and margins alternate for binding (\BolumSagdaKalsinNolu).
-  let twoside = printing != "one-sided"
+  let twoside = printing == "two-sided"
   let next-recto-page = if twoside { pagebreak(to: "odd", weak: true) } else { pagebreak(weak: true) }
 
   // ---- Institute names (cls \th@Enstitu / \th@Institute + \th@Instituteiki) ----
@@ -150,14 +267,19 @@
     if is-phd { "Doctor of Philosophy" } else { "Master of Science" }
   } else { degree-name-en }
 
-  let full-name = (name + " " + surname).trim()
-  let has(s) = s != none and str(s).trim() != ""
+  let full-name = if type(name) == str and type(surname) == str {
+    (name + " " + surname).trim()
+  } else [#name #surname]
+  let has = _has
   let clean-lines(lines) = lines.filter(has)
 
   // =====================================================================
   //  GLOBAL SETTINGS
   // =====================================================================
-  set document(title: title-tr.at(0, default: ""), author: full-name)
+  set document(
+    title: (if is-english { title-en } else { title-tr }).at(0, default: none),
+    author: if type(full-name) == str { full-name } else { () },
+  )
   set text(
     font: ("Times New Roman", "Libertinus Serif"),
     size: 12pt,

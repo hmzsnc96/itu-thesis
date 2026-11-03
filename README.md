@@ -65,6 +65,16 @@ Helpers for the content files: `abbreviation(term, description)` and
 `symbol-entry(term, description)` for the abbreviation/symbol lists, and
 `cv-heading`, `cv-education`, `cv-publication` for the CV.
 
+### Input checks
+
+The template stops with a clear error message instead of silently producing a
+wrong thesis, e.g. for an unknown `degree`/`institute`/`lang`/`printing` value,
+a title longer than 3 lines, a misspelled jury key (`university` instead of
+`univ`), or a file name passed instead of `include "file.typ"`. Common
+alternative spellings are accepted, including the LaTeX class option names
+(`"doktora"`, `"bez"`, `"karton"`, `"tekyonlu"`, `"fenbilimleri"`, …), a
+single-string title, and jury entries written as `("Name", "University")`.
+
 Body chapters (`= Giriş`, `== Alt başlık`, …) are written as ordinary Typst
 headings after the `#show` call; they are numbered automatically.
 
